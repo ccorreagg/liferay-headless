@@ -50,18 +50,19 @@ A Slack-ready message copied to the clipboard. Do not post it from the skill —
 Build it in two steps. First gather the candidates: **every** ticket behind any member's Recent PRs — merged and in flight alike, not only two per member — plus a `Current` and a `Fallback` ticket from Jira for each member who has no Recent PRs (rules below). Then pool all candidates, merge duplicates — a ticket picked for several members is one line crediting all of them — and emit only the **top 10** tickets, one per line, in this exact shape:
 
 ```
-• [<criticality>] <status> [<flags>] <@<slack-handle>[, @<slack-handle>]> — https://liferay.atlassian.net/browse/LPD-XXXXX — <summary>
+• <criticality> <status> [<flags>] <@<slack-handle>[, @<slack-handle>]> — https://liferay.atlassian.net/browse/LPD-XXXXX — <summary>
 ```
 
 - **Order**: every `***` ticket first, then `**`, then `*`. Within a tier, **merged** tickets come before **in-flight** ones: a ticket is merged when at least one of the credited members' Recent PRs on it is merged and none is still in flight; a ticket backed by no PR counts as in flight. Within each of those groups, the ticket with the most recent activity wins — the newest `updatedAt` among the credited members' Recent PRs on it, or the Jira `updated` timestamp when no PR backs it.
+- **Criticality icon**: `***` renders as ⭐⭐⭐, `**` as ⭐⭐, and `*` as ⭐. Pad fewer stars with two spaces per missing star so the status column lines up.
 - **Status**: ✅ when the ticket is merged, ⏳ when it is in flight — the same split that drives the **Order** above.
 - **Flags**: 🎨 when the change adds or reworks UI (a screen, flow, or component users see — not a minor tweak; generated JS/TS API clients do not count). ⚙️ when the change touches the backend (Java services, REST/GraphQL resources, batch, MCP, REST Builder and other generators) — check the PRs' changed files, and give a full-stack change both 🎨 and ⚙️. 💥 when the change introduces a breaking change in an API (removed or renamed operations, fields, or parameters; changed behavior clients rely on). For REST APIs this includes any change to the published contract: a removed or renamed endpoint, `operationId`, path or query parameter, or DTO field; a changed response shape, type, or status code; a sync operation turned async; and a new major API version (`v2.0`) that supersedes the previous one. A change that *prevents* a break — deprecated bridges, `compatibilityVersion` gating — is not flagged. Each flag owns a fixed slot, always in the order 🎨 ⚙️ 💥, separated by one space; a line that lacks a flag fills its slot with two spaces, so every icon sits in the same column on every line. Drop a slot altogether when no line in the message uses that flag.
 - **Legend**: after the last ticket, leave a blank line and add the legend on its own line, listing only the symbols the message uses:
 
 	```
-	[***] high · [**] medium · [*] low · ✅ merged · ⏳ in flight · 🎨 UI · ⚙️ backend · 💥 breaking change
+	⭐⭐⭐ high · ⭐⭐ medium · ⭐ low · ✅ merged · ⏳ in flight · 🎨 UI · ⚙️ backend · 💥 breaking change
 	```
-- **Alignment**: pad with trailing spaces so every column starts at the same position on every line — `[**]` and `[*]` are padded to the width of `[***]`, and each `<authors>` field and each URL is padded to the width of the longest one in the message, so the ` — ` separators, URLs, and summaries line up.
+- **Alignment**: pad with trailing spaces so every column starts at the same position on every line — the stars are padded as above, and each `<authors>` field and each URL is padded to the width of the longest one in the message, so the ` — ` separators, URLs, and summaries line up.
 - **Multi-ticket PRs**: when one PR carries several sibling tickets (`LPD-93380 LPD-93381 LPD-93382 Make copy, export and import async`), they are one line — use the first key and summarize the PR as a whole.
 - **Author**: right after the criticality, wrapped in a single pair of angle brackets, the `<slack-handle>` of each credited member, in roster order and comma-separated (`<@Daniel Raposo, @boton>`). It is the exact value from the Member Roster table for that member's `accountId` — never derive it from the Jira display name.
 - **Criticality**: `***`, `**`, or `*`, judged from the ticket on the line (the parent, never a Technical Task) — read its `summary`, `labels`, `priority`, and the titles of the PRs behind it. Take the first tier that matches:
