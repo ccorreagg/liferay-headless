@@ -50,11 +50,17 @@ A Slack-ready message copied to the clipboard. Do not post it from the skill —
 Build it in two steps. First gather the candidates: **every** ticket behind any member's Recent PRs — merged and in flight alike, not only two per member — plus a `Current` and a `Fallback` ticket from Jira for each member who has no Recent PRs (rules below). Then pool all candidates, merge duplicates — a ticket picked for several members is one line crediting all of them — and emit only the **top 10** tickets, one per line, in this exact shape:
 
 ```
-• [<criticality>] <status> <@<slack-handle>[, @<slack-handle>]> — https://liferay.atlassian.net/browse/LPD-XXXXX — <summary>
+• [<criticality>] <status> [<flags>] <@<slack-handle>[, @<slack-handle>]> — https://liferay.atlassian.net/browse/LPD-XXXXX — <summary>
 ```
 
 - **Order**: every `***` ticket first, then `**`, then `*`. Within a tier, **merged** tickets come before **in-flight** ones: a ticket is merged when at least one of the credited members' Recent PRs on it is merged and none is still in flight; a ticket backed by no PR counts as in flight. Within each of those groups, the ticket with the most recent activity wins — the newest `updatedAt` among the credited members' Recent PRs on it, or the Jira `updated` timestamp when no PR backs it.
 - **Status**: ✅ when the ticket is merged, ⏳ when it is in flight — the same split that drives the **Order** above.
+- **Flags**: 💥 when the change introduces a breaking change in an API (removed or renamed operations, fields, or parameters; changed behavior clients rely on). A change that *prevents* a break — deprecated bridges, `compatibilityVersion` gating — is not flagged. Lines without a flag are padded with spaces to the width of the widest flag set; when no line carries a flag, drop the column altogether.
+- **Legend**: after the last ticket, leave a blank line and add the legend on its own line, listing only the symbols the message uses:
+
+	```
+	[***] high · [**] medium · [*] low · ✅ merged · ⏳ in flight · 💥 breaking change
+	```
 - **Alignment**: pad with trailing spaces so every column starts at the same position on every line — `[**]` and `[*]` are padded to the width of `[***]`, and each `<authors>` field and each URL is padded to the width of the longest one in the message, so the ` — ` separators, URLs, and summaries line up.
 - **Multi-ticket PRs**: when one PR carries several sibling tickets (`LPD-93380 LPD-93381 LPD-93382 Make copy, export and import async`), they are one line — use the first key and summarize the PR as a whole.
 - **Author**: right after the criticality, wrapped in a single pair of angle brackets, the `<slack-handle>` of each credited member, in roster order and comma-separated (`<@Daniel Raposo, @boton>`). It is the exact value from the Member Roster table for that member's `accountId` — never derive it from the Jira display name.
