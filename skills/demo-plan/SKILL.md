@@ -55,11 +55,11 @@ Build it in two steps. First gather the candidates: **every** ticket behind any 
 
 - **Order**: every `***` ticket first, then `**`, then `*`. Within a tier, **merged** tickets come before **in-flight** ones: a ticket is merged when at least one of the credited members' Recent PRs on it is merged and none is still in flight; a ticket backed by no PR counts as in flight. Within each of those groups, the ticket with the most recent activity wins — the newest `updatedAt` among the credited members' Recent PRs on it, or the Jira `updated` timestamp when no PR backs it.
 - **Status**: ✅ when the ticket is merged, ⏳ when it is in flight — the same split that drives the **Order** above.
-- **Flags**: 💥 when the change introduces a breaking change in an API (removed or renamed operations, fields, or parameters; changed behavior clients rely on). A change that *prevents* a break — deprecated bridges, `compatibilityVersion` gating — is not flagged. Lines without a flag are padded with spaces to the width of the widest flag set; when no line carries a flag, drop the column altogether.
+- **Flags**: 🎨 when the change adds or reworks UI (a screen, flow, or component users see — not a minor tweak). 💥 when the change introduces a breaking change in an API (removed or renamed operations, fields, or parameters; changed behavior clients rely on). A change that *prevents* a break — deprecated bridges, `compatibilityVersion` gating — is not flagged. A line may carry both, in that order. Lines without a flag are padded with spaces to the width of the widest flag set; when no line carries a flag, drop the column altogether.
 - **Legend**: after the last ticket, leave a blank line and add the legend on its own line, listing only the symbols the message uses:
 
 	```
-	[***] high · [**] medium · [*] low · ✅ merged · ⏳ in flight · 💥 breaking change
+	[***] high · [**] medium · [*] low · ✅ merged · ⏳ in flight · 🎨 UI · 💥 breaking change
 	```
 - **Alignment**: pad with trailing spaces so every column starts at the same position on every line — `[**]` and `[*]` are padded to the width of `[***]`, and each `<authors>` field and each URL is padded to the width of the longest one in the message, so the ` — ` separators, URLs, and summaries line up.
 - **Multi-ticket PRs**: when one PR carries several sibling tickets (`LPD-93380 LPD-93381 LPD-93382 Make copy, export and import async`), they are one line — use the first key and summarize the PR as a whole.
