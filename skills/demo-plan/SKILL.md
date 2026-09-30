@@ -50,11 +50,12 @@ A Slack-ready message copied to the clipboard. Do not post it from the skill —
 Build it in two steps. First pick a `Current` and a `Fallback` candidate ticket for every member (rules below). Then pool all candidates, merge duplicates — a ticket picked for several members is one line crediting all of them — and emit only the **top 10** tickets, one per line, in this exact shape:
 
 ```
-• [<criticality>] <@<slack-handle>[, @<slack-handle>]> — https://liferay.atlassian.net/browse/LPD-XXXXX — <summary>
+• [<criticality>] [<status>] <@<slack-handle>[, @<slack-handle>]> — https://liferay.atlassian.net/browse/LPD-XXXXX — <summary>
 ```
 
 - **Order**: every `***` ticket first, then `**`, then `*`. Within a tier, **merged** tickets come before **in-flight** ones: a ticket is merged when at least one of the credited members' Recent PRs on it is merged and none is still in flight; a ticket backed by no PR counts as in flight. Within each of those groups, the ticket with the most recent activity wins — the newest `updatedAt` among the credited members' Recent PRs on it, or the Jira `updated` timestamp when no PR backs it.
-- **Alignment**: pad with trailing spaces so every column starts at the same position on every line — `[**]` and `[*]` are padded to the width of `[***]`, and each `<authors>` field and each URL is padded to the width of the longest one in the message, so the ` — ` separators, URLs, and summaries line up.
+- **Status**: `[Merged]` when the ticket is merged, `[Pending]` when it is in flight — the same split that drives the **Order** above.
+- **Alignment**: pad with trailing spaces so every column starts at the same position on every line — `[**]` and `[*]` are padded to the width of `[***]`, `[Merged]` to the width of `[Pending]`, and each `<authors>` field and each URL is padded to the width of the longest one in the message, so the ` — ` separators, URLs, and summaries line up.
 - **Author**: right after the criticality, wrapped in a single pair of angle brackets, the `<slack-handle>` of each credited member, in roster order and comma-separated (`<@Daniel Raposo, @boton>`). It is the exact value from the Member Roster table for that member's `accountId` — never derive it from the Jira display name.
 - **Criticality**: `***`, `**`, or `*`, judged from the ticket on the line (the parent, never a Technical Task) — read its `summary`, `labels`, `priority`, and the titles of the PRs behind it. Take the first tier that matches:
 	- `***` — the change touches an API exposed to customers (REST, GraphQL, batch, MCP tools, or the generators behind them such as REST Builder) or changes the UI; or it introduces — or prevents — a major (breaking) change in any API, such as renamed operations, removed or changed parameters, or `compatibilityVersion` gating; or it reshapes a framework in a significant way; or it belongs to a company top initiative (a label matching `*_Top_*`, e.g. `26_Top_PCE`, `27_Top_MCP_Enhacements`).
